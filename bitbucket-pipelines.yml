@@ -1,0 +1,32 @@
+image: python:3.9
+
+pipelines:
+  default:
+    - step:
+        name: Install and Lint
+        caches:
+          - pip
+        script:
+          - pip install -r requirement.txt
+          - pip install flake8
+          - flake app.py
+          
+    - step:
+        name: Build Docker Image
+        services:
+          - docker
+        script:
+          - docker build -t flask-app .
+
+    - step:
+        name: Run Test
+        script:
+          - python app.py &
+          - sleep 5
+          - curl -f http://localhost:5000 || exit 1
+
+    - step:
+        name: Simulate Deployment
+        script:
+          - echo "Deploying to production (simulated)..."
+          - echo "Build complete!"
